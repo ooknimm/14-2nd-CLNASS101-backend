@@ -1,13 +1,14 @@
 import jwt
 import bcrypt
 import re
+import uuid
 
 from django.http import JsonResponse
 
 from my_settings import SECRET, ALGORITHM
 from user.models import User
 
-def login_decorator(login_required):
+def login_decorator(login_required=True):
     def real_decorator(func):
         def wrapper(self, request, *args, **kwargs):
             try:
@@ -37,26 +38,24 @@ def login_decorator(login_required):
 
     return real_decorator
 
-
 def get_hashed_pw(password):
     return bcrypt.hashpw(password.encode("UTF-8"), bcrypt.gensalt()).decode("UTF-8")
-
 
 def is_valid_name(name):
     return re.match('^[a-z가-힣A-Z0-9]{1,20}$', name)
 
-
 def is_valid_email(email):
     return re.match('^[a-zA-Z0-9_+.-]+@([a-zA-Z0-9-]+\.)+[a-zA-Z0-9]+$', email)
-
 
 def is_valid_password(password):
     return re.match('^[a-z가-힣A-Z0-9]{8,25}$', password)
 
-
 def checkpw(password, user_object):
     return bcrypt.checkpw(password.encode('UTF-8'), user_object.password.encode('UTF-8'))
 
-
 def issue_token(user_id):
     return jwt.encode({'user_id': user_id}, SECRET['secret'], algorithm=ALGORITHM['algorithm']).decode('UTF-8')
+
+def random_number_generator():
+    return str(uuid.uuid4())
+
